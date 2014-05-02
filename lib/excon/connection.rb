@@ -156,7 +156,10 @@ module Excon
           else
             datum[:headers]['TE'] = 'trailers, deflate, gzip'
           end
-          datum[:headers]['Connection'] = datum[:persistent] ? 'TE' : 'TE, close'
+          connection_header_values = (datum[:headers]['Connection'] || '').split(',')
+          connection_header_values << 'TE'
+          connection_header_values << 'close' unless datum[:persistent]
+          datum[:headers]['Connection'] = connection_header_values.uniq.join(', ')
 
           # add headers to request
           datum[:headers].each do |key, values|
